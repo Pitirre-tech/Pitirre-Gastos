@@ -28,6 +28,13 @@ IVU, a category guess, payment method, and every line item. Check the numbers, t
 - **Business use %**: for receipts that were partly personal. The workbook's category/month totals use only the business portion.
 - **Duplicate warning**: same amount on the same date (or same receipt number) asks before saving.
 
+## Mileage log
+Main screen → **Mileage log**. Log each business drive the same day: date, from, to, business purpose, client/project, and
+miles (one way + "round trip"), or odometer start/end. **Repeat a recent trip** fills in regular routes with one tap.
+Add odometer readings on **January 1 and December 31** (the screen reminds you); the workbook's **Mileage** sheet uses them
+to show total miles driven and the business-use percentage, with a yellow rate-per-mile cell for your accountant.
+Assumes one vehicle for the business-use percentage. Deleted trips go to Trash like expenses.
+
 ## Year-end package for the accountant
 Main screen → **Year-end for your accountant**. It checks the year first (expenses without a receipt, anything left in
 "Other") with links to fix each one, then downloads one ZIP:

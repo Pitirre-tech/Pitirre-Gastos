@@ -138,7 +138,14 @@ export async function readReceipt(fd) {
     const data = await extractReceipt(file);
     return data ? { ok: true, data } : { error: 'readFailed' };
   } catch (x) {
-    console.error(x);
+    console.error(x.message || x);
+    const msg = String(x.detail || x.message || '').toLowerCase();
+    if (msg.includes('credit balance')) return { error: 'readNoCredit' };
+    if (x.status === 401 || x.type === 'authentication_error') return { error: 'readBadKey' };
+    if (x.status === 403 || x.type === 'permission_error' || msg.includes('workspace')) return { error: 'readWorkspace' };
+    if (x.status === 404 || x.type === 'not_found_error') return { error: 'readModel' };
+    if (x.status === 429 || x.type === 'rate_limit_error') return { error: 'readLimit' };
+    if (msg.includes('image') || msg.includes('pdf') || msg.includes('media')) return { error: 'readBadFile' };
     return { error: 'readFailed' };
   }
 }

@@ -107,7 +107,10 @@ export default async function Home({ searchParams }) {
         ))}
       </section>
 
-      <Link href={`/year?y=${month.slice(0, 4)}`} className="year-link">{t.yearEnd}</Link>
+      <div className="tiles">
+        <Link href={`/trips?y=${month.slice(0, 4)}`} className="year-link">{t.mileage}</Link>
+        <Link href={`/year?y=${month.slice(0, 4)}`} className="year-link">{t.yearEnd}</Link>
+      </div>
 
       <footer className="exports">
         <a href={`/api/export?m=${month}`}>{t.exportMonth}</a>

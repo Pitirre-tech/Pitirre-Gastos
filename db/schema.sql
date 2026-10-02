@@ -78,3 +78,33 @@ create table if not exists login_failures (
   at timestamptz not null default now()
 );
 create index if not exists login_failures_at_idx on login_failures (at);
+
+-- Mileage log
+create table if not exists trips (
+  id              serial primary key,
+  trip_date       date not null,
+  vehicle         text,
+  start_place     text not null,
+  end_place       text not null,
+  purpose         text not null,
+  client_project  text,
+  odometer_start  numeric(9,1),
+  odometer_end    numeric(9,1),
+  miles           numeric(8,1) not null check (miles > 0),   -- total for the trip (already doubled if round trip)
+  round_trip      boolean not null default false,
+  notes           text,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  deleted_at      timestamptz
+);
+create index if not exists trips_date_idx on trips (trip_date);
+
+create table if not exists odometer_readings (
+  id         serial primary key,
+  read_on    date not null,
+  vehicle    text,
+  reading    numeric(9,1) not null check (reading >= 0),
+  note       text,
+  created_at timestamptz not null default now()
+);
+create index if not exists odometer_readings_date_idx on odometer_readings (read_on);
