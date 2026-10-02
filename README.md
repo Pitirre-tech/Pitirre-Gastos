@@ -65,7 +65,7 @@ and put it in this app's `HUB_DATABASE_URL`.
 ## Setup (≈15 min)
 1. **Neon**: create a project `pitirre-gastos`, open the SQL editor, run `db/schema.sql` (safe to re-run; it also adds the receipt-reading tables). Copy the pooled connection string.
 2. **GitHub**: create a repo, push this folder.
-3. **Vercel**: Import the repo. In the project → Storage → create a **Blob** store and connect it (adds `BLOB_READ_WRITE_TOKEN`).
+3. **Vercel**: Import the repo. In the project → Storage → create a **Blob** store and connect it (adds `BLOB_STORE_ID`; new stores sign in automatically through Vercel OIDC, older ones use `BLOB_READ_WRITE_TOKEN`).
 4. **Environment variables** (Vercel → Settings → Environment Variables):
    - `DATABASE_URL` — Neon connection string
    - `APP_PIN` — your login PIN. Use at least 6 digits (8 is better). After 5 wrong tries from one place, or 20 from anywhere, login locks for 15 minutes

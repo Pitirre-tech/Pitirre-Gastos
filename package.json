@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
-    "@vercel/blob": "^1.0.0",
+    "@vercel/blob": "^2.8.0",
     "exceljs": "^4.4.0",
     "jszip": "^3.10.2",
     "next": "^15.5.0",

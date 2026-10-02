@@ -121,11 +121,23 @@ function parseReceiptData(fd) {
   }
 }
 
+// New Blob stores connect with BLOB_STORE_ID + Vercel OIDC (the SDK handles that by itself), older ones with
+// BLOB_READ_WRITE_TOKEN. Only pass a token explicitly for an older store connected with a custom prefix.
+function blobToken() {
+  if (process.env.BLOB_STORE_ID || process.env.BLOB_READ_WRITE_TOKEN) return undefined;
+  const found = Object.keys(process.env).find((k) => k.endsWith('_READ_WRITE_TOKEN') && String(process.env[k]).startsWith('vercel_blob_rw_'));
+  return found ? process.env[found] : undefined;
+}
+
+async function removeBlob(url) {
+  if (url) await del(url, { token: blobToken() }).catch(() => {});
+}
+
 async function uploadReceipt(file, spentOn) {
   if (!file || typeof file === 'string' || !file.size) return null;
   const ext = file.type === 'application/pdf' ? 'pdf' : 'jpg';
   const blob = await put(`receipts/${spentOn.slice(0, 7)}/receipt.${ext}`, file, {
-    access: 'public', addRandomSuffix: true, contentType: file.type || 'image/jpeg',
+    access: 'public', addRandomSuffix: true, contentType: file.type || 'image/jpeg', token: blobToken(),
   });
   return blob.url;
 }
@@ -250,7 +262,7 @@ export async function updateExpense(id, fd) {
         from n where expenses.id = ${id}`;
     }
     await saveItems(sql, id, parseItems(fd));
-    if (newUrl && old.receipt_url) await del(old.receipt_url).catch(() => {});
+    if (newUrl && old.receipt_url) await removeBlob(old.receipt_url);
     await sql`insert into expense_log (expense_id, action, detail) values (${id}, 'edited', ${`${e.vendor} ${e.amount}`})`;
   } catch (x) {
     return { error: saveError(x) };
@@ -283,7 +295,7 @@ export async function purgeExpense(id) {
   await requireAuth();
   const sql = db();
   const [row] = await sql`delete from expenses where id = ${id} and deleted_at is not null returning ref, vendor, amount, receipt_url`;
-  if (row?.receipt_url) await del(row.receipt_url).catch(() => {});
+  if (row?.receipt_url) await removeBlob(row.receipt_url);
   if (row) await sql`insert into expense_log (expense_id, action, detail) values (${id}, 'purged', ${`${row.ref} ${row.vendor} ${row.amount}`})`;
   revalidatePath('/trash');
 }
