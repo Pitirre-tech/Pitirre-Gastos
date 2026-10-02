@@ -1,6 +1,7 @@
 import { dictFor, CATEGORIES, METHODS } from '@/lib/i18n';
 import { getYear } from '@/lib/yeardata';
 import { buildWorkbook } from '@/lib/yearend';
+import { getIncome } from '@/lib/income';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,9 +12,9 @@ export async function GET(req) {
   if (!/^\d{4}$/.test(year || '')) return new Response('Use ?y=YYYY', { status: 400 });
   const lang = p.get('lang') === 'en' ? 'en' : 'es';
   const t = dictFor(lang);
-  const { rows, items, trips, readings } = await getYear(year);
+  const [{ rows, items, trips, readings }, income] = await Promise.all([getYear(year), getIncome(year)]);
   const buf = await buildWorkbook({
-    year, lang, t, rows, items, trips, readings, categories: CATEGORIES, methods: METHODS,
+    year, lang, t, rows, items, trips, readings, income, categories: CATEGORIES, methods: METHODS,
     business: process.env.BUSINESS_NAME || 'Pitirre Tech',
     email: process.env.BUSINESS_EMAIL || 'hello@pitirre.tech',
   });

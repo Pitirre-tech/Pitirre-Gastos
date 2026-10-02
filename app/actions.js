@@ -9,6 +9,18 @@ import { makeToken, verifyToken } from '@/lib/auth';
 import { CATEGORIES, METHODS } from '@/lib/i18n';
 import { extractReceipt } from '@/lib/receipt';
 
+// Turns a save failure into a specific on-screen reason (details still go to Vercel → Logs).
+function saveError(x) {
+  console.error('Save failed:', x?.message || x);
+  const m = String(x?.message || x || '').toLowerCase();
+  if (m.includes('blob') && m.includes('token')) return 'saveNoBlob';
+  if (m.includes('blob') && (m.includes('private') || m.includes('access'))) return 'saveBlobPrivate';
+  if (m.includes('blob')) return 'saveBlob';
+  if (m.includes('does not exist') && (m.includes('relation') || m.includes('column'))) return 'saveNoTable';
+  if (m.includes('password authentication') || m.includes('connection') || m.includes('database_url') || m.includes('fetch failed')) return 'saveDb';
+  return 'failed';
+}
+
 async function requireAuth() {
   const ok = await verifyToken((await cookies()).get('session')?.value);
   if (!ok) redirect('/login');
@@ -191,8 +203,7 @@ export async function createExpense(fd) {
     await saveItems(sql, row.id, parseItems(fd));
     await sql`insert into expense_log (expense_id, action, detail) values (${row.id}, 'created', ${`${row.ref} ${e.vendor} ${e.amount}`})`;
   } catch (x) {
-    console.error(x);
-    return { error: 'failed' };
+    return { error: saveError(x) };
   }
   revalidatePath('/');
   return { ok: true };
@@ -242,8 +253,7 @@ export async function updateExpense(id, fd) {
     if (newUrl && old.receipt_url) await del(old.receipt_url).catch(() => {});
     await sql`insert into expense_log (expense_id, action, detail) values (${id}, 'edited', ${`${e.vendor} ${e.amount}`})`;
   } catch (x) {
-    console.error(x);
-    return { error: 'failed' };
+    return { error: saveError(x) };
   }
   revalidatePath('/');
   revalidatePath(`/e/${id}`);

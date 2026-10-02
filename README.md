@@ -47,6 +47,21 @@ Main screen → **Year-end for your accountant**. It checks the year first (expe
 The ZIP is assembled in your browser, so it isn't limited by Vercel's response size. Optional env vars:
 `BUSINESS_NAME`, `BUSINESS_EMAIL` (shown on the summary sheet).
 
+## Income from Pitirre Hub
+Set `HUB_DATABASE_URL` and the year-end workbook gains an **Income** sheet: every hub invoice issued or paid that year,
+with services before IVU, IVU, total, status, date paid, amount received and amount withheld by the client, plus totals
+(invoiced, received, withheld, IVU, still unpaid). Void invoices are listed but not totaled. The Summary sheet shows
+income received and withheld.
+
+Give this app **read-only** access. In the hub's Neon project → SQL Editor:
+```sql
+CREATE ROLE gastos_reader WITH LOGIN PASSWORD 'pick-a-long-random-password';
+GRANT USAGE ON SCHEMA public TO gastos_reader;
+GRANT SELECT ON invoices TO gastos_reader;
+```
+Then take the hub's pooled connection string, replace the user and password with `gastos_reader` and that password,
+and put it in this app's `HUB_DATABASE_URL`.
+
 ## Setup (≈15 min)
 1. **Neon**: create a project `pitirre-gastos`, open the SQL editor, run `db/schema.sql` (safe to re-run; it also adds the receipt-reading tables). Copy the pooled connection string.
 2. **GitHub**: create a repo, push this folder.
